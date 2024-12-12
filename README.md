@@ -28,3 +28,7 @@ This project provides a libretro core to play games from BBK Longman
 which can be dumped from 0x800000-0x9fffff and 0xe00000-0xffffff.
 
 -------
+
+## 修改
+
+ - 增加条件编译符 `SWAP_LCD_WIDTH_HEIGHT`, 用以对换LCD宽高，使某些环境使用核心屏幕比例时能正常工作(RG28XX)
