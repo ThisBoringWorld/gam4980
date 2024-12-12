@@ -1058,10 +1058,23 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
+//交换LCD宽高屏幕大小
+#if SWAP_LCD_WIDTH_HEIGHT
+    
+    info->geometry.base_width = LCD_HEIGHT;
+    info->geometry.base_height = LCD_WIDTH;
+    info->geometry.max_width = LCD_HEIGHT;
+    info->geometry.max_height = LCD_WIDTH;
+
+#else
+    
     info->geometry.base_width = LCD_WIDTH;
     info->geometry.base_height = LCD_HEIGHT;
     info->geometry.max_width = LCD_WIDTH;
     info->geometry.max_height = LCD_HEIGHT;
+
+#endif // SWAP_LCD_WIDTH_HEIGHT
+
     info->geometry.aspect_ratio = 0.0;
     info->timing.fps = 60.0;
     info->timing.sample_rate = 44100;
