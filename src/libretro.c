@@ -1,7 +1,8 @@
-#include <stdarg.h>
+﻿#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include "libretro.h"
 
 #define _DATA1          0x00
@@ -117,7 +118,8 @@ static struct {
     uint16_t lcd_bg;
     uint16_t lcd_fg;
     uint8_t lcd_ghosting;
-} vars = { 1.0, 1.0, 0xd6da, 0x0000, 20 };
+    long key_pressed_input_min_interval; //按下按键的最小输入间隔(ms)
+} vars = { 1.0, 1.0, 0xd6da, 0x0000, 20, 0x0000 };
 
 static void s6502_push(uint8_t val)
 {
@@ -651,6 +653,24 @@ static void sys_keydown(uint8_t key)
 {
     if (key == 0)
         return;
+
+    //控制连续输入的频率
+    static long last_input_time = 0;
+    static uint8_t last_input_key = 0;
+
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    long current_time = (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+
+    if (key == last_input_key
+        && current_time - last_input_time < vars.key_pressed_input_min_interval)
+    {
+        return;
+    }
+
+    last_input_key = key;
+    last_input_time = current_time;
+
     sys.ram[_SYSCON] &= 0xf7;
     sys.ram[_KEYCODE] = key | 0x80;
     sys.ram[_ISR] |= 0x80;
@@ -997,6 +1017,12 @@ void retro_set_environment(retro_environment_t cb)
             .values = {{"0.25"},{"0.50"},{"0.75"},{"1.00"},{"1.50"},{"2.00"},{"3.00"},{"4.00"},{"8.00"},{NULL}},
             .default_value = "1.00",
         },
+        {
+            .key = "gam4980_key_pressed_input_min_interval",
+            .desc = "Key pressed input min interval(ms)",
+            .values = {{"0"},{"50"},{"100"},{"150"},{"200"},{"250"},{"300"},{"400"},{"500"},{NULL}},
+            .default_value = "0",
+        },
         { NULL, NULL, NULL, {{0}}, NULL },
     };
 
@@ -1136,6 +1162,10 @@ static void apply_variables()
     var.key = "gam4980_timer_rate";
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var))
         vars.timer_rate = atof(var.value);
+
+    var.key = "gam4980_key_pressed_input_min_interval";
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var))
+        vars.key_pressed_input_min_interval = atof(var.value);
 }
 
 void retro_init(void)
