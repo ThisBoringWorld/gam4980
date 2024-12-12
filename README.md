@@ -1,3 +1,13 @@
+# gam4980
+
+步步高A系列电子词典模拟器的 libretro 核心
+
+## 仓库原始来源: https://codeberg.org/iyzsong/gam4980.git
+
+ - `master` 分支为原始代码
+
+-------
+
 本项目提供步步高朗文4980电子词典游戏模拟器的 libretro 核心。
 
 
@@ -16,3 +26,5 @@
 This project provides a libretro core to play games from BBK Longman
 4980 electronic dictionary.  2 ROM files (8.BIN and E.BIN) are needed,
 which can be dumped from 0x800000-0x9fffff and 0xe00000-0xffffff.
+
+-------
