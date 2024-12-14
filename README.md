@@ -29,6 +29,14 @@ which can be dumped from 0x800000-0x9fffff and 0xe00000-0xffffff.
 
 -------
 
+## 编译
+
+[build](./build/) 目录下包含一些构建脚本
+
+## ROM
+
+[retroarch](./retroarch/) 目录下为 retroarch 需要的文件
+
 ## 修改
 
  - 增加条件编译符 `SWAP_LCD_WIDTH_HEIGHT`, 用以对换LCD宽高，使某些环境使用核心屏幕比例时能正常工作(RG28XX)
