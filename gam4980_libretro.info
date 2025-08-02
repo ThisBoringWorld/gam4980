@@ -18,6 +18,6 @@ libretro_saves = "true"
 cheats = "false"
 needs_fullpath = "false"
 disk_control = "false"
-is_experimental = "true"
+is_experimental = "false"
 
 description = "BBK A4980 game emulator for libretro."
