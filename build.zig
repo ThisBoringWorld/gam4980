@@ -1,17 +1,21 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
-    const lib = b.addSharedLibrary(.{
-        // XXX: Remove "lib" prefix in "libgame4980_libretro.so"
+    const lib = b.addLibrary(.{
         .name = "retro",
-        .target = b.standardTargetOptions(.{}),
-        .optimize = b.standardOptimizeOption(.{}),
-        .strip = true,
+        .root_module = b.createModule(.{
+            .target = b.standardTargetOptions(.{}),
+            .optimize = b.standardOptimizeOption(.{}),
+            .strip = false,
+        }),
+        .linkage = .dynamic,
     });
     lib.linkLibC();
     lib.addCSourceFile(.{
         .file = b.path("libretro.c"),
-        .flags = &.{},
     });
-    b.installArtifact(lib);
+    const install = b.addInstallArtifact(lib, .{
+        .dest_sub_path = "gam4980_libretro.so",
+    });
+    b.getInstallStep().dependOn(&install.step);
 }
