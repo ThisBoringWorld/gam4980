@@ -444,13 +444,13 @@ static void mem_bs(uint8_t sel)
         }
     } else if (paddr >= 0x800000 && paddr < 0xa00000) {
         for (int i = 0; i < 16; i += 1) {
-            sys.mem_r[sel * 16 + i] = sys.rom_8 + paddr - 0x800000 + i * 0x100;
+            sys.mem_r[sel * 16 + i] = sys.rom_8 + (paddr - 0x800000) + i * 0x100;
             sys.mem_ir[sel * 16 + i] = rom_8_vread;
             sys.mem_iw[sel * 16 + i] = invalid_write;
         }
     } else if (paddr >= 0xe00000 && paddr < 0x1000000) {
         for (int i = 0; i < 16; i += 1) {
-            sys.mem_r[sel * 16 + i] = sys.rom_e + paddr - 0xe00000 + i * 0x100;
+            sys.mem_r[sel * 16 + i] = sys.rom_e + (paddr - 0xe00000) + i * 0x100;
             sys.mem_ir[sel * 16 + i] = rom_e_vread;
             sys.mem_iw[sel * 16 + i] = invalid_write;
         }
@@ -647,6 +647,20 @@ static uint8_t _kbdk[RETROK_LAST] = {
     [RETROK_PAGEDOWN]  = KEY_PGDN,
 };
 
+static void error_msg(const char *msg)
+{
+    struct retro_message_ext m = {
+        .msg = msg,
+        .duration = 3000,
+        .priority = 5,
+        .level = RETRO_LOG_ERROR,
+        .target = RETRO_MESSAGE_TARGET_ALL,
+        .type = RETRO_MESSAGE_TYPE_NOTIFICATION_ALT,
+        .progress = -1,
+    };
+    environ_cb(RETRO_ENVIRONMENT_SET_MESSAGE_EXT, &m);
+}
+
 static void sys_keydown(uint8_t key)
 {
     if (key == 0)
@@ -695,10 +709,20 @@ static void sys_init(const char *romdir)
     FILE *stream;
     snprintf(path, 512, "%s/8.BIN", romdir);
     stream = fopen(path, "r");
+    if (stream == NULL) {
+        error_msg("GAM4980: Missing 8.BIN");
+        environ_cb(RETRO_ENVIRONMENT_SHUTDOWN, NULL);
+        return;
+    }
     fread(sys.rom_8, 0x200000, 1, stream);
     fclose(stream);
     snprintf(path, 512, "%s/E.BIN", romdir);
     stream = fopen(path, "r");
+    if (stream == NULL) {
+        error_msg("GAM4980: Missing E.BIN");
+        environ_cb(RETRO_ENVIRONMENT_SHUTDOWN, NULL);
+        return;
+    }
     fread(sys.rom_e, 0x200000, 1, stream);
     fclose(stream);
 
@@ -738,10 +762,6 @@ static void sys_init(const char *romdir)
         inputs[RETRO_DEVICE_ID_JOYPAD_R3].description = "S";
     }
     environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, &inputs);
-}
-
-static void sys_deinit()
-{
 }
 
 static void sys_load(const uint8_t *gam, size_t size)
@@ -1168,7 +1188,6 @@ void retro_set_controller_port_device(unsigned port, unsigned device)
 
 void retro_deinit(void)
 {
-    sys_deinit();
 }
 
 void retro_reset(void)
