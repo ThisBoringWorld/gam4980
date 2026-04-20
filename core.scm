@@ -640,11 +640,11 @@
                                (status uint8_t))))
 
        (define (s6502_exec u cycles) (uint32_t s6502_t* uint32_t)
-         (declare
-          _table (array (static void*) 0x100
-                        ,@(map (lambda (x) (string->symbol
-                                            (format #f "&&_~2,'0x" x)))
-                               (iota 256))))
+         (define _table
+           (array (static void*) 0x100)
+           (array-literal
+            ,@(map (lambda (x) (string->symbol (format #f "&&_~2,'0x" x)))
+                   (iota 256))))
          (pre-let*
           ,macros
           (let* ((executed uint32_t 0)
@@ -658,7 +658,7 @@
                  (sp uint8_t u:sp)
                  (status uint8_t u:status))
             (label _exit
-                   (if (>= executed cycles)
+                   (if (or (>= executed cycles) (sys_halt_p))
                        (begin
                          (set u:pc pc
                               u:ac ac

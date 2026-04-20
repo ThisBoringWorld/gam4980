@@ -85,7 +85,7 @@ uint32_t s6502_exec(s6502_t *u, uint32_t cycles) {
     uint8_t sp = u->sp;
     uint8_t status = u->status;
   _exit:
-    if (executed >= cycles || sys_halt_p()) {
+    if ((executed >= cycles) || sys_halt_p()) {
       u->pc = pc;
       u->ac = ac;
       u->ix = ix;
