@@ -7,11 +7,11 @@ pub fn build(b: *std.Build) void {
             .target = b.standardTargetOptions(.{}),
             .optimize = b.standardOptimizeOption(.{}),
             .strip = false,
+            .link_libc = true,
         }),
         .linkage = .dynamic,
     });
-    lib.linkLibC();
-    lib.addCSourceFile(.{
+    lib.root_module.addCSourceFile(.{
         .file = b.path("libretro.c"),
     });
     const install = b.addInstallArtifact(lib, .{
